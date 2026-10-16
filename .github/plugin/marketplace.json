@@ -1,0 +1,19 @@
+{
+  "name": "mrscraper",
+  "owner": {
+    "name": "MrScraper",
+    "email": "support@mrscraper.com"
+  },
+  "metadata": {
+    "description": "MrScraper plugin for GitHub Copilot CLI.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "mrscraper",
+      "description": "Retrieve public web pages as HTML, Markdown, or screenshots and discover pages through Google search with MrScraper's hosted MCP server. Includes skills that keep the raw page as the source for local extraction and check account usage.",
+      "version": "0.1.0",
+      "source": "./plugins/mrscraper"
+    }
+  ]
+}
