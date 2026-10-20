@@ -1,0 +1,112 @@
+name: Validate Copilot CLI plugin
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  COPILOT_CLI_VERSION: 1.0.98
+  # github/awesome-copilot commit whose external plugin quality gates this job runs.
+  AWESOME_COPILOT_SHA: cb64ad12e32737ae764becd6885462e9b4c7cb00
+  COPILOT_AUTO_UPDATE: "false"
+
+jobs:
+  validate:
+    name: Schema, repository checks, and install
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Validate against the Agent Plugins 1.0 schemas
+        run: |
+          mkdir -p "$RUNNER_TEMP/schemas"
+          for name in plugin mcp; do
+            curl -fsSL -o "$RUNNER_TEMP/schemas/$name.schema.json" \
+              "https://agent-plugins.org/schemas/1.0.0/$name.schema.json"
+            npx --yes ajv-cli@5.0.0 validate --spec=draft2020 \
+              -s "$RUNNER_TEMP/schemas/$name.schema.json" \
+              -d "plugins/mrscraper/$name.json"
+          done
+
+      - name: Check manifest, marketplace, skills, and changelog
+        run: node .github/scripts/check-plugin.mjs .
+
+      - name: Install Copilot CLI
+        run: npm install --global "@github/copilot@${COPILOT_CLI_VERSION}"
+
+      - name: Install the plugin and confirm what it loads
+        env:
+          HOME: ${{ runner.temp }}/copilot-home
+        run: |
+          mkdir -p "$HOME"
+          copilot --version
+          copilot plugin marketplace add "$GITHUB_WORKSPACE"
+          copilot plugin install mrscraper@mrscraper
+
+          copilot plugin list --json | tee "$RUNNER_TEMP/plugins.json"
+          version="$(jq -r .version plugins/mrscraper/plugin.json)"
+          jq -e --arg version "$version" \
+            'any(.[]; .name == "mrscraper" and .marketplace == "mrscraper" and .version == $version and .enabled)' \
+            "$RUNNER_TEMP/plugins.json"
+
+          copilot mcp get mrscraper --json | tee "$RUNNER_TEMP/mcp.json"
+          jq -e '.mrscraper | .url == "https://mcp.mrscraper.com/mcp" and .source == "plugin" and (has("headers") | not)' \
+            "$RUNNER_TEMP/mcp.json"
+
+          copilot skill list | tee "$RUNNER_TEMP/skills.txt"
+          for skill in mrscraper mrscraper-fetch mrscraper-serp; do
+            grep -qE "^  ${skill} - " "$RUNNER_TEMP/skills.txt" || { echo "::error::missing skill ${skill}"; exit 1; }
+          done
+
+  awesome-copilot-gates:
+    name: awesome-copilot external plugin quality gates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check out awesome-copilot quality gates
+        uses: actions/checkout@v4
+        with:
+          repository: github/awesome-copilot
+          ref: ${{ env.AWESOME_COPILOT_SHA }}
+          path: awesome-copilot
+          sparse-checkout: eng
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install gate dependencies and Copilot CLI
+        run: |
+          npm ci --prefix awesome-copilot --ignore-scripts --no-audit --no-fund
+          npm install --global "@github/copilot@${COPILOT_CLI_VERSION}"
+
+      - name: Run spec compliance, vally lint, install smoke test, and version match
+        env:
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          plugin_json="$(jq -c --arg repo "$GITHUB_REPOSITORY" --arg sha "$SOURCE_SHA" \
+            '{name, description, version, author, repository, homepage, license, keywords,
+              source: {source: "github", repo: $repo, path: "plugins/mrscraper", sha: $sha}}' \
+            plugins/mrscraper/plugin.json)"
+          cd awesome-copilot
+          node eng/external-plugin-quality-gates.mjs --plugin-json "$plugin_json" \
+            --log-file "$RUNNER_TEMP/quality-gates.log" > "$RUNNER_TEMP/quality-gates.json"
+          cat "$RUNNER_TEMP/quality-gates.log"
+          jq -e '.overall_status == "pass" and .spec_compliance_status == "pass"' "$RUNNER_TEMP/quality-gates.json"

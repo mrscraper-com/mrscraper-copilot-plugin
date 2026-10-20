@@ -1,0 +1,15 @@
+# Security Policy
+
+Please report suspected vulnerabilities privately to
+[support@mrscraper.com](mailto:support@mrscraper.com). Include the affected
+component, reproduction steps, and potential impact. Do not open a public issue
+for an unpatched vulnerability or include credentials, tokens, customer data,
+or private target content in a report.
+
+This repository contains no MrScraper credentials and no executable code that
+runs on your machine: the plugin is a manifest, an MCP server URL, and skill
+instructions. Authentication is handled by GitHub Copilot CLI's OAuth 2.1 MCP
+connection, which stores and refreshes the tokens. If you use the API key
+fallback, the key stays in your own `~/.copilot/mcp-config.json` and carries
+full account authority. If a credential may have been exposed, revoke it
+through the relevant account or client immediately and then contact support.
