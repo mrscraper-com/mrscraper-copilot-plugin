@@ -34,8 +34,7 @@ filling, or signed-in flows, use Playwright or another browser automation tool.
 ## Requirements
 
 - GitHub Copilot CLI. Installation was tested with 1.0.98.
-- A [MrScraper](https://app.mrscraper.com) account. The free plan includes
-  1,000 tokens per month and does not require a credit card.
+- A [MrScraper](https://app.mrscraper.com) account.
 - A local browser for the OAuth sign-in.
 - Permission to access and process the target content.
 
