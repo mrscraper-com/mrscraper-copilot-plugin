@@ -2,7 +2,7 @@
 
 MrScraper connects [GitHub Copilot CLI](https://docs.github.com/copilot/how-tos/copilot-cli)
 to a hosted MCP server that retrieves public web pages as HTML, Markdown, or
-screenshots, discovers pages through Google search, and reports account usage.
+screenshots, discovers pages through web search, and reports account usage.
 The plugin also includes three skills that tell the agent which tool to use and
 to keep the raw page content as the source for summaries and local extraction.
 
@@ -25,8 +25,8 @@ public pages. This plugin helps when a task needs more control over retrieval:
   to appear before the content is read.
 - Content that differs by country, with retries and a per-request token cap.
 - A screenshot of the page saved as an image file.
-- Google results as structured JSON (organic results, related questions, and
-  pagination) for a chosen region, language, and results page.
+- Web search results as a ranked list (title, link, description, and source)
+  for a chosen country, up to 100 at a time.
 
 It retrieves pages; it does not drive a browser session. For clicking, form
 filling, or signed-in flows, use Playwright or another browser automation tool.
@@ -75,11 +75,11 @@ keys into the chat.
 | Tool | Purpose |
 | --- | --- |
 | `scraperAPI` | Retrieve a known page as HTML, Markdown, a screenshot, or a combination. |
-| `webSearch` | Discover public pages through Google. |
+| `webSearch` | Discover public pages through web search. |
 | `status` | Inspect subscription status, token usage, and remaining tokens. |
 
-The OAuth scopes are `scrape:read` (`scraperAPI` and `webSearch`) and
-`account:read` (`status`).
+The OAuth scopes are `scrape:write` (`scraperAPI`), `scrape:read`
+(`webSearch`), and `account:read` (`status`).
 
 ## Try it
 
@@ -88,7 +88,7 @@ Fetch https://www.scrapethissite.com/pages/simple/ as Markdown and list the five
 ```
 
 ```text
-Search Google for open source web scraping libraries and compare the top five results.
+Search the web for open source web scraping libraries and compare the top five results.
 ```
 
 ```text
