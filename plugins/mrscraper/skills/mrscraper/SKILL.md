@@ -1,14 +1,14 @@
 ---
 name: mrscraper
 description: |
-  Connect, authenticate, route, and troubleshoot MrScraper MCP, and check account usage with the status tool. For known public URLs, retrieve and preserve page content with mrscraper-fetch first; use mrscraper-serp for query-first discovery through Google.
+  Connect, authenticate, route, and troubleshoot MrScraper MCP, and check account usage with the status tool. For known public URLs, retrieve and preserve page content with mrscraper-fetch first; use mrscraper-serp for query-first discovery through web search.
 ---
 
 # MrScraper MCP
 
 Use this skill for connection and authentication checks, tool selection, shared
 response handling, account status, and troubleshooting. Load the focused fetch
-or SERP skill for page retrieval and Google search.
+or SERP skill for page retrieval and web search.
 
 ## Step 1 — Verify or Connect MrScraper MCP
 
@@ -47,9 +47,9 @@ Never place credentials in tool arguments, print them, write them into project
 artifacts, or manually reproduce the OAuth exchange. Do not configure an
 API-key or bearer-token fallback from these skills.
 
-The connection uses two scopes: scrape:read for scraperAPI and webSearch, and
-account:read for status. A tool called without its scope returns 403
-insufficient_scope; reauthorize the connection so the client requests it.
+The connection uses three scopes: scrape:write for scraperAPI, scrape:read for
+webSearch, and account:read for status. A tool called without its scope returns
+403 insufficient_scope; reauthorize the connection so the client requests it.
 
 Verify end-to-end access with status, which reads the account without
 retrieving a page:
@@ -65,7 +65,7 @@ complete.
 | User outcome | MCP tool or skill |
 | --- | --- |
 | Retrieve and preserve a known public page as HTML, Markdown, or a screenshot | `mrscraper-fetch` with scraperAPI |
-| Discover relevant pages from a Google query | `mrscraper-serp` with webSearch, then retrieve selected pages |
+| Discover relevant pages from a web search query | `mrscraper-serp` with webSearch, then retrieve selected pages |
 | Check the plan, token usage, or remaining tokens | status |
 
 ### Retrieve first, extract locally
@@ -158,8 +158,8 @@ account usage, not the progress of a request.
   replaced by scraperAPI, webSearch, and status.
 - Page incomplete or missing dynamic content: load mrscraper-fetch and revise
   page-loading inputs deliberately.
-- Search results weak: load mrscraper-serp and refine the query, locale, or
-  page.
+- Search results weak: load mrscraper-serp and refine the query, country, or
+  number of results.
 
 ## Limits
 

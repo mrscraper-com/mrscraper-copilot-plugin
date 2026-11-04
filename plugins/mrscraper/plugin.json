@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "mrscraper",
-  "version": "0.1.0",
-  "description": "Retrieve public web pages as HTML, Markdown, or screenshots and discover pages through Google search with MrScraper's hosted MCP server. Includes skills that keep the raw page as the source for local extraction and check account usage.",
+  "version": "0.2.0",
+  "description": "Retrieve public web pages as HTML, Markdown, or screenshots and discover pages through web search with MrScraper's hosted MCP server. Includes skills that keep the raw page as the source for local extraction and check account usage.",
   "author": {
     "name": "MrScraper",
     "email": "support@mrscraper.com",
